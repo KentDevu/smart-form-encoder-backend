@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
@@ -58,14 +58,11 @@ async def register(
 
 @router.post("/refresh", response_model=ApiResponse[TokenRefreshResponse])
 async def refresh_token(
-    request_obj: object = Depends(),
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ) -> ApiResponse[TokenRefreshResponse]:
     """Refresh access token using the httpOnly refresh token cookie."""
-    from fastapi import Request
-
     # Get refresh token from cookie
-    request: Request = request_obj  # type: ignore[assignment]
     token = request.cookies.get("refresh_token")
     if not token:
         from app.core.exceptions import UnauthorizedException

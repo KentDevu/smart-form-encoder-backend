@@ -1,6 +1,8 @@
 from uuid import UUID
+import asyncio
+import json
 
-from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, WebSocket, WebSocketDisconnect
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_admin
@@ -251,3 +253,102 @@ async def delete_form(
         success=True,
         message="Form entry deleted successfully",
     )
+
+
+@router.websocket("/ws/ocr/{form_id}")
+async def websocket_ocr_progress(
+    websocket: WebSocket,
+    form_id: UUID,
+):
+    """
+    WebSocket endpoint for real-time OCR progress updates.
+    
+    Connects to ws://host/api/v1/forms/ws/ocr/{form_id}
+    
+    Sends JSON messages with OCR status:
+    {
+        "status": "uploaded" | "processing" | "extracted" | "verified" | "archived",
+        "confidence_score": float | null,
+        "message": str | null
+    }
+    """
+    await websocket.accept()
+    
+    try:
+        from sqlalchemy import select
+        from app.models.form_entry import FormEntry
+        from app.database import AsyncSessionLocal
+        
+        # Get initial form state
+        async with AsyncSessionLocal() as db:
+            stmt = select(FormEntry).where(FormEntry.id == form_id)
+            result = await db.execute(stmt)
+            entry = result.scalar_one_or_none()
+            
+            if not entry:
+                await websocket.send_json({
+                    "error": "Form not found"
+                })
+                await websocket.close()
+                return
+        
+        # Send initial status
+        await websocket.send_json({
+            "status": entry.status,
+            "confidence_score": float(entry.confidence_score) if entry.confidence_score else None,
+            "message": "Connected to OCR progress stream"
+        })
+        
+        last_status = entry.status
+        last_confidence = entry.confidence_score
+        
+        # Poll for updates every 2 seconds
+        while True:
+            await asyncio.sleep(2)
+            
+            async with AsyncSessionLocal() as db:
+                stmt = select(FormEntry).where(FormEntry.id == form_id)
+                result = await db.execute(stmt)
+                entry = result.scalar_one_or_none()
+                
+                if not entry:
+                    # Form might have been deleted
+                    await websocket.send_json({
+                        "status": "archived",
+                        "confidence_score": None,
+                        "message": "Form archived or deleted"
+                    })
+                    break
+                
+                # Only send if status changed
+                if entry.status != last_status or entry.confidence_score != last_confidence:
+                    await websocket.send_json({
+                        "status": entry.status,
+                        "confidence_score": float(entry.confidence_score) if entry.confidence_score else None,
+                        "message": f"Status updated to {entry.status}"
+                    })
+                    last_status = entry.status
+                    last_confidence = entry.confidence_score
+                    
+                    # Close connection when processing is complete
+                    if entry.status in ["extracted", "verified", "archived"]:
+                        break
+
+        # Always close the WebSocket after the loop ends
+        await websocket.close()
+
+    except WebSocketDisconnect:
+        print(f"[OCR WebSocket] Client disconnected for form {form_id}")
+    except Exception as e:
+        print(f"[OCR WebSocket] Error for form {form_id}: {e}")
+        try:
+            await websocket.send_json({
+                "error": f"Server error: {str(e)}"
+            })
+        except:
+            pass
+        finally:
+            try:
+                await websocket.close()
+            except:
+                pass
