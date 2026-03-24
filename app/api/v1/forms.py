@@ -1,6 +1,8 @@
 from uuid import UUID
+import asyncio
+import json
 
-from fastapi import APIRouter, Depends, File, Form, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, WebSocket, WebSocketDisconnect
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_admin
@@ -237,6 +239,61 @@ async def verify_form(
     )
 
 
+@router.post("/{form_id}/retry", response_model=ApiResponse[FormEntryResponse])
+async def retry_ocr(
+    form_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> ApiResponse[FormEntryResponse]:
+    """Retry OCR processing for a form that is stuck in processing state."""
+    from app.models.form_entry import FormEntry, FormEntryStatus
+    from app.models.form_field import FormField
+
+    service = FormService(db)
+    entry = await service.get_entry(form_id, current_user)
+
+    # Only allow retry for uploaded or processing status
+    if entry.status not in [FormEntryStatus.UPLOADED, FormEntryStatus.PROCESSING]:
+        return ApiResponse(
+            success=False,
+            data=None,
+            message=f"Cannot retry form in '{entry.status}' status. Form must be in 'uploaded' or 'processing' state.",
+        )
+
+    # Clear existing data and reset status
+    from sqlalchemy import update, delete
+
+    # Delete existing fields
+    await db.execute(
+        delete(FormField).where(FormField.entry_id == form_id)
+    )
+
+    # Reset entry status
+    await db.execute(
+        update(FormEntry).where(FormEntry.id == form_id).values(
+            status=FormEntryStatus.UPLOADED,
+            raw_ocr_data=None,
+            verified_data=None,
+            confidence_score=None,
+            processing_time=None,
+        )
+    )
+    await db.commit()
+
+    # Refresh entry to get updated values
+    await db.refresh(entry)
+
+    # Trigger OCR processing asynchronously
+    from app.services.ocr_task import process_ocr_task
+    process_ocr_task.delay(str(form_id))
+
+    return ApiResponse(
+        success=True,
+        data=FormEntryResponse.model_validate(entry),
+        message="OCR processing restarted.",
+    )
+
+
 @router.delete("/{form_id}", response_model=ApiResponse[None])
 async def delete_form(
     form_id: UUID,
@@ -251,3 +308,83 @@ async def delete_form(
         success=True,
         message="Form entry deleted successfully",
     )
+
+
+@router.websocket("/ws/ocr/{form_id}")
+async def websocket_ocr_progress(
+    websocket: WebSocket,
+    form_id: UUID,
+):
+    """
+    WebSocket endpoint for real-time OCR progress updates using Redis pub/sub.
+
+    Connects to ws://host/api/v1/forms/ws/ocr/{form_id}
+
+    Sends JSON messages with OCR status:
+    {
+        "status": "uploaded" | "processing" | "extracted" | "verified" | "archived",
+        "confidence_score": float | null,
+        "message": str | null
+    }
+
+    Memory-efficient: Uses Redis pub/sub instead of database polling.
+    """
+    from app.services.websocket_manager import manager
+    from sqlalchemy import select
+    from app.models.form_entry import FormEntry
+    from app.database import async_session_factory
+
+    form_id_str = str(form_id)
+
+    try:
+        # Connect using the WebSocket manager
+        await manager.connect(websocket, form_id_str)
+
+        # Get and send initial form state
+        async with async_session_factory() as db:
+            stmt = select(FormEntry).where(FormEntry.id == form_id)
+            result = await db.execute(stmt)
+            entry = result.scalar_one_or_none()
+
+            if not entry:
+                await websocket.send_json({
+                    "status": "archived",
+                    "error": "Form not found"
+                })
+                return
+
+            # Send initial status
+            await websocket.send_json({
+                "status": entry.status,
+                "confidence_score": float(entry.confidence_score) if entry.confidence_score else None,
+                "message": f"OCR status: {entry.status}"
+            })
+
+            # If already complete, don't wait for Redis updates
+            if entry.status in ["extracted", "verified", "archived"]:
+                return
+
+    except Exception as e:
+        logger.error(f"[OCR WebSocket] Error setting up connection for {form_id}: {e}")
+        try:
+            await websocket.close()
+        except:
+            pass
+        return
+
+    try:
+        # Keep connection alive and send/receive messages
+        # WebSocket manager handles actual message delivery via Redis pub/sub
+        while True:
+            # Wait for any messages from client (keep connection alive)
+            data = await websocket.receive_text()
+            # Client can send "ping" to keep connection alive
+            if data == "ping":
+                await websocket.send_json({"type": "pong"})
+
+    except WebSocketDisconnect:
+        logger.info(f"[OCR WebSocket] Client disconnected for form {form_id}")
+    except Exception as e:
+        logger.error(f"[OCR WebSocket] Error for form {form_id}: {e}")
+    finally:
+        await manager.disconnect(websocket, form_id_str)

@@ -65,6 +65,20 @@ def get_presigned_url(object_key: str, expires_in: int = 3600) -> str:
     )
 
 
+def generate_presigned_url(object_key: str, method: str = "put", expiration: int = 900) -> str:
+    """Generate a pre-signed URL for uploading or reading an object from R2."""
+    client = _get_r2_client()
+    action = "put_object" if method.lower() == "put" else "get_object"
+    return client.generate_presigned_url(
+        action,
+        Params={
+            "Bucket": settings.R2_BUCKET_NAME,
+            "Key": object_key,
+        },
+        ExpiresIn=expiration,
+    )
+
+
 def delete_file_from_r2(object_key: str) -> None:
     """Delete a file from R2."""
     client = _get_r2_client()

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Start SmartForm backend services (API + Celery OCR worker)
-# Usage: ./scripts/start-backend.sh
+# Usage: LOW_RAM=1 ./scripts/start-backend.sh
+#        ./scripts/start-backend.sh (normal mode with --reload)
 
 set -e
 
@@ -20,6 +21,20 @@ if [[ ! -f "$PYTHON" ]]; then
     exit 1
 fi
 
+# Low-RAM mode configuration
+if [[ "$LOW_RAM" == "1" ]]; then
+    echo "🔋 Low-RAM mode enabled"
+    # No --reload for uvicorn, solo pool + single worker for celery
+    UVICORN_OPTS="--host 0.0.0.0 --port 8000"
+    CELERY_OPTS="worker -Q ocr,celery -l info --concurrency=1 --pool=solo --max-tasks-per-child=3"
+    export LOW_RAM_MODE="true"
+else
+    # Normal dev mode with --reload
+    UVICORN_OPTS="--host 0.0.0.0 --port 8000 --reload"
+    CELERY_OPTS="worker -Q ocr,celery -l info --concurrency=1 --max-tasks-per-child=10"
+    export LOW_RAM_MODE="false"
+fi
+
 cleanup() {
     echo ""
     echo "🛑 Shutting down services..."
@@ -34,16 +49,19 @@ echo "======================================="
 
 # Start API server
 echo "📡 Starting API server on http://localhost:8000 ..."
-$UVICORN app.main:app --host 0.0.0.0 --port 8000 --reload &
+$UVICORN app.main:app $UVICORN_OPTS &
 API_PID=$!
 
 # Start Celery OCR worker
 echo "⚙️  Starting Celery OCR worker..."
-$CELERY -A app.celery_app worker -Q ocr,celery -l info &
+$CELERY -A app.celery_app $CELERY_OPTS &
 WORKER_PID=$!
 
 echo ""
 echo "✅ Services running:"
+if [[ "$LOW_RAM" == "1" ]]; then
+    echo "   Mode:   LOW-RAM (solo pool, no reload, auto-recycle)"
+fi
 echo "   API:    http://localhost:8000  (PID: $API_PID)"
 echo "   Docs:   http://localhost:8000/docs"
 echo "   Worker: Celery OCR queue      (PID: $WORKER_PID)"

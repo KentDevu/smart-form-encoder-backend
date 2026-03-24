@@ -17,8 +17,28 @@ _paddle_ocr = None
 
 
 def _get_paddle_ocr():
-    """Lazy initialize PaddleOCR instance."""
+    """
+    Lazy initialize PaddleOCR instance.
+
+    In low-RAM mode, the model is not cached and is reloaded per task.
+    This uses less memory but is slower.
+    """
     global _paddle_ocr
+
+    from app.config import get_settings
+    settings = get_settings()
+
+    # In low-RAM mode without caching, don't use global cache
+    if settings.LOW_RAM_MODE or not settings.CACHE_OCR_MODEL:
+        from paddleocr import PaddleOCR
+        return PaddleOCR(
+            use_angle_cls=True,
+            lang="en",
+            use_gpu=False,
+            show_log=False,
+        )
+
+    # Normal mode: cache the model globally
     if _paddle_ocr is None:
         from paddleocr import PaddleOCR
         _paddle_ocr = PaddleOCR(
@@ -957,7 +977,12 @@ def _recheck_activity_checkboxes(
         elif "```" in content:
             content = content.split("```")[1].split("```")[0]
 
-        result = json.loads(content.strip())
+        content = content.strip()
+        if not content:
+            logger.warning("PSIC re-check: empty response from API")
+            return None
+
+        result = json.loads(content)
         logger.info(f"PSIC re-check raw response: {result}")
 
         # Normalize to "true"/""

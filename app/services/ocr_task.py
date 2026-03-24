@@ -24,6 +24,31 @@ settings = get_settings()
 LOW_CONFIDENCE_THRESHOLD = 0.7
 
 
+def _sync_publish_progress(form_id: str, status: str, confidence: float | None = None,
+                           message: str | None = None) -> None:
+    """
+    Synchronous wrapper to publish OCR progress via Redis.
+    Celery tasks run synchronously so we can't use async functions directly.
+
+    This publishes to Redis which then forwards to WebSocket connections.
+    """
+    import redis
+    import json
+    try:
+        settings = get_settings()
+        # Connect to Redis directly without async wrapper
+        r = redis.from_url(settings.REDIS_URL, decode_responses=False)
+        data = {
+            "status": status,
+            "confidence_score": float(confidence) if confidence else None,
+            "message": message or f"OCR status: {status}"
+        }
+        r.publish(f"form:progress:{form_id}", json.dumps(data))
+        r.close()
+    except Exception as e:
+        logger.error(f"Failed to publish progress for {form_id}: {e}")
+
+
 def _get_sync_session() -> Session:
     """Create a synchronous DB session for Celery tasks."""
     from sqlalchemy.orm import sessionmaker
@@ -86,6 +111,9 @@ def process_ocr_task(self, form_entry_id: str) -> dict:
 
         logger.info(f"Starting OCR for entry {form_entry_id}")
 
+        # Publish processing status
+        _sync_publish_progress(form_entry_id, "processing")
+
         # Step 1: Download image
         image_bytes = _download_image_from_r2(entry.image_url)
         logger.info(f"Downloaded image: {len(image_bytes)} bytes")
@@ -96,6 +124,11 @@ def process_ocr_task(self, form_entry_id: str) -> dict:
             f"OCR complete: {len(ocr_result['raw_lines'])} lines, "
             f"avg confidence: {ocr_result['avg_confidence']:.2f}"
         )
+
+        # Publish OCR extraction complete
+        _sync_publish_progress(form_entry_id, "processing",
+                              confidence=ocr_result['avg_confidence'],
+                              message="OCR text extraction complete, analyzing fields...")
 
         # Step 3: Map to form fields (AI-powered with PaddleOCR text + image)
         mapped_fields = map_ocr_to_fields(ocr_result, template.field_schema, image_bytes)
@@ -108,6 +141,8 @@ def process_ocr_task(self, form_entry_id: str) -> dict:
 
         if low_conf_fields:
             logger.info(f"Enhancing {len(low_conf_fields)} low-confidence fields with AI Vision")
+            _sync_publish_progress(form_entry_id, "processing",
+                                  message=f"Enhancing {len(low_conf_fields)} low-confidence fields...")
             enhanced = enhance_with_vision(
                 image_bytes, template.field_schema, low_conf_fields
             )
@@ -156,6 +191,11 @@ def process_ocr_task(self, form_entry_id: str) -> dict:
             f"OCR pipeline complete for entry {form_entry_id}: "
             f"{len(mapped_fields)} fields, avg confidence: {avg_confidence:.2f}"
         )
+
+        # Publish completion status
+        _sync_publish_progress(form_entry_id, "extracted",
+                              confidence=avg_confidence,
+                              message="OCR processing complete")
 
         return {
             "entry_id": form_entry_id,

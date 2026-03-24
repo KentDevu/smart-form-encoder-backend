@@ -29,6 +29,9 @@ class FormEntry(Base):
     uploaded_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
     )
+    uploaded_by_device_id: Mapped[str | None] = mapped_column(
+        String(255), nullable=True, index=True, comment="Mobile device ID for tracking"
+    )
     verified_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
     )

@@ -56,7 +56,19 @@ class Settings(BaseSettings):
         return [k for k in keys if k]
 
     # CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001"]
+
+    # Performance / Low-RAM Mode
+    # When set to True, disables memory-intensive features
+    LOW_RAM_MODE: bool = False
+
+    # OCR Model Caching
+    # When False, reloads PaddleOCR model per task (slower but uses less memory)
+    CACHE_OCR_MODEL: bool = True
+
+    # Worker Configuration
+    # Max tasks per worker before recycling (helps free memory)
+    CELERY_MAX_TASKS_PER_CHILD: int = 10  # Restart every 10 tasks to free memory
 
     model_config = {
         "env_file": ".env",
