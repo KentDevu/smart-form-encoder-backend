@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.auth import router as auth_router
+from app.api.v1.diagnostics import router as diagnostics_router
 from app.api.v1.forms import router as forms_router
 from app.api.v1.ml import router as ml_router
 from app.api.v1.mobile import router as mobile_router
@@ -12,3 +13,4 @@ router.include_router(forms_router)
 router.include_router(ml_router)
 router.include_router(users_router)
 router.include_router(mobile_router)
+router.include_router(diagnostics_router)

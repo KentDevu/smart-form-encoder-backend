@@ -2,12 +2,16 @@ from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
+from app.config import get_settings
 from app.database import get_db
 from app.models.user import User
 from app.schemas.auth import LoginRequest, LoginResponse, RegisterRequest, TokenRefreshResponse
 from app.schemas.common import ApiResponse
 from app.schemas.user import UserResponse
 from app.services.auth_service import AuthService
+
+router = APIRouter(prefix="/auth", tags=["Authentication"])
+settings = get_settings()
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -23,11 +27,13 @@ async def login(
     result = await service.login(body.email, body.password)
 
     # Set refresh token as httpOnly cookie
+    # Use secure=True only for production (HTTPS)
+    is_production = not settings.DEBUG
     response.set_cookie(
         key="refresh_token",
         value=result["refresh_token"],
         httponly=True,
-        secure=True,
+        secure=is_production,
         samesite="lax",
         max_age=7 * 24 * 60 * 60,  # 7 days
         path="/api/v1/auth",
@@ -92,9 +98,12 @@ async def get_me(
 @router.post("/logout")
 async def logout(response: Response) -> ApiResponse[None]:
     """Logout by clearing the refresh token cookie."""
+    # Use same secure setting as login
+    is_production = not settings.DEBUG
     response.delete_cookie(
         key="refresh_token",
         path="/api/v1/auth",
+        secure=is_production,
     )
     return ApiResponse(
         success=True,

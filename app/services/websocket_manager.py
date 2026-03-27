@@ -92,69 +92,66 @@ class WebSocketManager:
 
     async def _redis_subscriber(self) -> None:
         """Subscribe to Redis pub/sub channel for progress updates."""
-        import redis.asyncio as aioredis
-        from app.config import get_settings
-
-        settings = get_settings()
-        redis_url = settings.REDIS_URL
+        from app.redis_pool import get_async_redis_client
 
         try:
-            # Parse Redis URL
-            if redis_url.startswith("redis://"):
-                redis_client = await aioredis.from_url(redis_url, decode_responses=True)
-                pubsub = redis_client.pubsub()
+            # Get client from pool instead of creating new one
+            redis_client = await get_async_redis_client()
+            pubsub = redis_client.pubsub()
 
-                # Subscribe to all form progress updates
-                await pubsub.subscribe("form:progress:*")
+            # Subscribe to all form progress updates using pattern subscription (psubscribe)
+            # This allows us to match channels like "form:progress:{form_id}"
+            await pubsub.psubscribe("form:progress:*")
+            logger.info("✓ Pattern subscribed to: form:progress:*")
 
-                logger.info("Redis pub/sub subscriber started")
-
-                while self._running:
-                    try:
-                        message = await pubsub.get_message(timeout=1.0)
-                        if message and message["type"] == "message":
+            while self._running:
+                try:
+                    message = await pubsub.get_message(timeout=1.0)
+                    if message:
+                        # Pattern subscriptions send "pmessage" type, not "message"
+                        if message["type"] == "pmessage":
                             # Parse the channel to get form_id
                             # Format: "form:progress:{form_id}"
-                            channel = message["channel"]
+                            channel = message["channel"].decode() if isinstance(message["channel"], bytes) else message["channel"]
                             form_id = channel.split(":")[-1] if ":" in channel else channel
 
-                            # Parse the message
+                            # Parse the message data
                             try:
-                                data = json.loads(message["data"])
+                                data_str = message["data"].decode() if isinstance(message["data"], bytes) else message["data"]
+                                data = json.loads(data_str)
+                                logger.debug(f"[Redis] Message from {channel}: status={data.get('status')}")
                                 await self.broadcast_to_form(form_id, data)
-                            except json.JSONDecodeError:
-                                logger.warning(f"Invalid JSON in Redis message: {message['data']}")
+                            except json.JSONDecodeError as je:
+                                logger.warning(f"Invalid JSON in Redis message: {message['data']} - {je}")
+                        elif message["type"] == "psubscribe":
+                            logger.debug(f"Subscribed to pattern: {message['pattern']}")
 
-                    except asyncio.CancelledError:
-                        break
-                    except Exception as e:
-                        logger.error(f"Redis subscriber error: {e}")
-                        # Brief pause before continuing
-                        await asyncio.sleep(1.0)
+                except asyncio.CancelledError:
+                    break
+                except Exception as e:
+                    logger.error(f"Redis subscriber error: {e}", exc_info=True)
+                    # Brief pause before continuing
+                    await asyncio.sleep(1.0)
 
-                await pubsub.close()
-                await redis_client.close()
-                logger.info("Redis pub/sub subscriber stopped")
+            await pubsub.close()
+            logger.info("Redis pub/sub subscriber stopped")
 
         except Exception as e:
-            logger.error(f"Failed to start Redis subscriber: {e}")
+            logger.error(f"Failed to start Redis subscriber: {e}", exc_info=True)
             self._running = False
 
     async def publish_progress(self, form_id: str, status: str, confidence: float | None = None,
                                message: str | None = None) -> None:
         """
-        Publish progress update to Redis. This is called by Celery tasks.
-        Only publishes if there are active connections for this form.
+        Publish progress update to Redis.
+        This is called by Celery tasks to broadcast OCR progress to all WebSocket clients.
+        Always publishes regardless of active connections (late-arriving clients should receive updates).
+        Reuses Redis client from pool to avoid creating new connections.
         """
-        if form_id not in self.active_connections:
-            return  # No listeners, don't bother publishing
-
         try:
-            import redis.asyncio as aioredis
-            from app.config import get_settings
+            from app.redis_pool import get_async_redis_client
 
-            settings = get_settings()
-            redis_client = await aioredis.from_url(settings.REDIS_URL)
+            redis_client = await get_async_redis_client()
 
             data = {
                 "status": status,
@@ -162,8 +159,10 @@ class WebSocketManager:
                 "message": message or f"OCR status: {status}"
             }
 
-            await redis_client.publish(f"form:progress:{form_id}", json.dumps(data))
-            await redis_client.close()
+            channel = f"form:progress:{form_id}"
+            payload = json.dumps(data)
+            await redis_client.publish(channel, payload)
+            logger.debug(f"[Redis] Published to {channel}: status={status}")
 
         except Exception as e:
             logger.error(f"Failed to publish progress to Redis: {e}")

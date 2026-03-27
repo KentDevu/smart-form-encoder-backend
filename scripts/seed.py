@@ -15,6 +15,7 @@ from app.core.security import hash_password
 from app.models.user import User, UserRole
 from app.models.form_template import FormTemplate
 from app.database import Base
+from app.services.forms.template_schema import normalize_template_schema
 
 settings = get_settings()
 
@@ -1338,6 +1339,7 @@ async def seed():
 
         # Seed templates
         for tmpl in TEMPLATES:
+            normalized_schema = normalize_template_schema(tmpl["field_schema"])
             result = await db.execute(
                 select(FormTemplate).where(FormTemplate.name == tmpl["name"])
             )
@@ -1347,12 +1349,12 @@ async def seed():
                 template = FormTemplate(
                     name=tmpl["name"],
                     description=tmpl["description"],
-                    field_schema=tmpl["field_schema"],
+                    field_schema=normalized_schema,
                 )
                 db.add(template)
                 print(f"✅ Template created: {tmpl['name']}")
             else:
-                existing.field_schema = tmpl["field_schema"]
+                existing.field_schema = normalized_schema
                 existing.description = tmpl["description"]
                 print(f"🔄 Template updated: {tmpl['name']}")
 

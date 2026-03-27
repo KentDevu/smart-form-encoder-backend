@@ -69,3 +69,27 @@ class FormTemplateResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class TemplateSearchRegion(BaseModel):
+    x_min: float = 0.0
+    y_min: float = 0.0
+    x_max: float = 1.0
+    y_max: float = 1.0
+
+
+class TemplateExtractionConfig(BaseModel):
+    strategy: str = "label_nearby"
+    anchor_labels: list[str] = Field(default_factory=list)
+    search_region: TemplateSearchRegion = Field(default_factory=TemplateSearchRegion)
+    ai_prompt_hint: str | None = None
+    value_postprocess: str | None = None
+
+
+class TemplateFieldSchema(BaseModel):
+    name: str
+    label: str
+    type: str = "text"
+    required: bool = False
+    options: list[str] = Field(default_factory=list)
+    extraction: TemplateExtractionConfig = Field(default_factory=TemplateExtractionConfig)

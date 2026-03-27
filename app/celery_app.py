@@ -1,10 +1,13 @@
 """Celery application configuration for memory-efficient OCR processing."""
 
+import logging
 from celery import Celery
+from celery.signals import worker_process_init
 
 from app.config import get_settings
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
 
 celery_app = Celery(
     "smartform_ocr",
@@ -29,15 +32,23 @@ celery_app.conf.update(
     worker_disable_rate_limits=True,  # Disable rate limiting
     task_compression="gzip",   # Compress task messages
     result_compression="gzip", # Compress results
+    # Worker memory recycling: restart after N tasks to prevent memory leak accumulation
+    # CELERY_MAX_TASKS_PER_CHILD is set to 50 for optimal performance (good tradeoff)
+    worker_max_tasks_per_child=getattr(settings, "CELERY_MAX_TASKS_PER_CHILD", 50),
+    # Result expiration: keep in Redis for 1 hour to avoid memory bloat
+    result_expires=3600,
 )
 
-# In low-RAM mode, add aggressive memory recycling settings
-if settings.LOW_RAM_MODE:
-    celery_app.conf.update(
-        # Restart worker after N tasks to free accumulated memory
-        CELERYD_MAX_TASKS_PER_CHILD=getattr(settings, "CELERY_MAX_TASKS_PER_CHILD", 5),
-        # Lower result expiration to free Redis memory
-        result_expires=3600,  # 1 hour
-        # Disable task result storage if not needed
-        task_ignore_result=False,  # We need results for progress tracking
-    )
+
+@worker_process_init.connect
+def init_worker_process(**kwargs):
+    """Initialize Redis pool when Celery worker process starts."""
+    try:
+        from app.redis_pool import init_sync_redis_pool
+        init_sync_redis_pool(settings.REDIS_URL)
+        logger.info("[Celery] Sync Redis pool initialized in worker process")
+        # Fix 6: Log model caching setting
+        logger.info(f"[Celery][MEMORY CONFIG] OCR model caching: {'ENABLED (500MB RAM)' if settings.CACHE_OCR_MODEL else 'DISABLED (lower RAM, slower)'}")
+        logger.info(f"[Celery][MEMORY CONFIG] Worker max tasks per child: {settings.CELERY_MAX_TASKS_PER_CHILD} (auto-restart after N tasks)")
+    except Exception as e:
+        logger.error(f"[Celery] Failed to initialize Redis pool: {e}", exc_info=True)

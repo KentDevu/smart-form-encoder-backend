@@ -10,6 +10,7 @@ from app.models.form_entry import FormEntry, FormEntryStatus
 from app.models.form_field import FormField
 from app.models.form_template import FormTemplate
 from app.models.user import User, UserRole
+from app.services.forms.template_schema import normalize_template_schema
 
 
 class FormService:
@@ -71,10 +72,11 @@ class FormService:
         self, name: str, description: str | None, field_schema: dict
     ) -> FormTemplate:
         """Create a new form template."""
+        normalized_schema = normalize_template_schema(field_schema)
         template = FormTemplate(
             name=name,
             description=description,
-            field_schema=field_schema,
+            field_schema=normalized_schema,
         )
         self.db.add(template)
         await self.db.flush()
