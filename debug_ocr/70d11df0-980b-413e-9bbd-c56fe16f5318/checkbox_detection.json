@@ -1,0 +1,1111 @@
+{
+  "total_checkboxes_detected": 79,
+  "checkboxes": [
+    {
+      "name": "reg_type_new",
+      "state": "unchecked",
+      "confidence": 0.66,
+      "anchor_text": "NEW",
+      "bbox": {
+        "top": 131.0,
+        "left": 25.0,
+        "bottom": 142.0,
+        "right": 59.0,
+        "width": 34.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "with_tin",
+      "state": "unchecked",
+      "confidence": 0.68,
+      "anchor_text": "with TIN",
+      "bbox": {
+        "top": 170.0,
+        "left": 25.0,
+        "bottom": 181.0,
+        "right": 72.0,
+        "width": 47.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "date_registered",
+      "state": "unchecked",
+      "confidence": 0.7,
+      "anchor_text": "Date registered",
+      "bbox": {
+        "top": 131.0,
+        "left": 302.0,
+        "bottom": 142.0,
+        "right": 361.0,
+        "width": 59.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "without_tin",
+      "state": "unchecked",
+      "confidence": 0.696,
+      "anchor_text": "without TIN",
+      "bbox": {
+        "top": 169.0,
+        "left": 298.0,
+        "bottom": 183.0,
+        "right": 359.0,
+        "width": 61.0,
+        "height": 14.0
+      }
+    },
+    {
+      "name": "5._last_name",
+      "state": "unchecked",
+      "confidence": 0.678,
+      "anchor_text": "5. Last Name",
+      "bbox": {
+        "top": 209.0,
+        "left": 320.0,
+        "bottom": 220.0,
+        "right": 368.0,
+        "width": 48.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "dela_cruz",
+      "state": "unchecked",
+      "confidence": 0.696,
+      "anchor_text": "Dela Cruz",
+      "bbox": {
+        "top": 222.0,
+        "left": 320.0,
+        "bottom": 236.0,
+        "right": 365.0,
+        "width": 45.0,
+        "height": 14.0
+      }
+    },
+    {
+      "name": "9._gender",
+      "state": "unchecked",
+      "confidence": 0.698,
+      "anchor_text": "9. Gender",
+      "bbox": {
+        "top": 241.0,
+        "left": 303.0,
+        "bottom": 252.0,
+        "right": 339.0,
+        "width": 36.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "gender_male",
+      "state": "unchecked",
+      "confidence": 0.68,
+      "anchor_text": "Male",
+      "bbox": {
+        "top": 251.0,
+        "left": 302.0,
+        "bottom": 265.0,
+        "right": 339.0,
+        "width": 37.0,
+        "height": 14.0
+      }
+    },
+    {
+      "name": "gender_female",
+      "state": "unchecked",
+      "confidence": 0.699,
+      "anchor_text": "Female",
+      "bbox": {
+        "top": 263.0,
+        "left": 306.0,
+        "bottom": 280.0,
+        "right": 349.0,
+        "width": 43.0,
+        "height": 17.0
+      }
+    },
+    {
+      "name": "1",
+      "state": "unchecked",
+      "confidence": 0.374,
+      "anchor_text": "1",
+      "bbox": {
+        "top": 132.0,
+        "left": 1.0,
+        "bottom": 141.0,
+        "right": 12.0,
+        "width": 11.0,
+        "height": 9.0
+      }
+    },
+    {
+      "name": "z",
+      "state": "unchecked",
+      "confidence": 0.392,
+      "anchor_text": "Z",
+      "bbox": {
+        "top": 171.0,
+        "left": 3.0,
+        "bottom": 180.0,
+        "right": 11.0,
+        "width": 8.0,
+        "height": 9.0
+      }
+    },
+    {
+      "name": "3._first_name",
+      "state": "unchecked",
+      "confidence": 0.693,
+      "anchor_text": "3. First Name",
+      "bbox": {
+        "top": 209.0,
+        "left": 2.0,
+        "bottom": 220.0,
+        "right": 50.0,
+        "width": 48.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "maria",
+      "state": "unchecked",
+      "confidence": 0.698,
+      "anchor_text": "Maria",
+      "bbox": {
+        "top": 222.0,
+        "left": 1.0,
+        "bottom": 237.0,
+        "right": 30.0,
+        "width": 29.0,
+        "height": 15.0
+      }
+    },
+    {
+      "name": "year",
+      "state": "unchecked",
+      "confidence": 0.699,
+      "anchor_text": "Year",
+      "bbox": {
+        "top": 253.0,
+        "left": 20.0,
+        "bottom": 265.0,
+        "right": 36.0,
+        "width": 16.0,
+        "height": 12.0
+      }
+    },
+    {
+      "name": "1985",
+      "state": "unchecked",
+      "confidence": 0.7,
+      "anchor_text": "1985",
+      "bbox": {
+        "top": 269.0,
+        "left": 1.0,
+        "bottom": 281.0,
+        "right": 26.0,
+        "width": 25.0,
+        "height": 12.0
+      }
+    },
+    {
+      "name": "4._middle_name",
+      "state": "unchecked",
+      "confidence": 0.698,
+      "anchor_text": "4. Middle Name",
+      "bbox": {
+        "top": 209.0,
+        "left": 164.0,
+        "bottom": 219.0,
+        "right": 217.0,
+        "width": 53.0,
+        "height": 10.0
+      }
+    },
+    {
+      "name": "santos",
+      "state": "unchecked",
+      "confidence": 0.698,
+      "anchor_text": "Santos",
+      "bbox": {
+        "top": 224.0,
+        "left": 164.0,
+        "bottom": 235.0,
+        "right": 194.0,
+        "width": 30.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "8._civil_status",
+      "state": "unchecked",
+      "confidence": 0.673,
+      "anchor_text": "8. Civil Status",
+      "bbox": {
+        "top": 241.0,
+        "left": 164.0,
+        "bottom": 251.0,
+        "right": 210.0,
+        "width": 46.0,
+        "height": 10.0
+      }
+    },
+    {
+      "name": "legally_separated",
+      "state": "unchecked",
+      "confidence": 0.68,
+      "anchor_text": "Legally separated",
+      "bbox": {
+        "top": 252.0,
+        "left": 164.0,
+        "bottom": 265.0,
+        "right": 245.0,
+        "width": 81.0,
+        "height": 13.0
+      }
+    },
+    {
+      "name": "civil_status_single",
+      "state": "unchecked",
+      "confidence": 0.697,
+      "anchor_text": "Single",
+      "bbox": {
+        "top": 266.0,
+        "left": 178.0,
+        "bottom": 278.0,
+        "right": 203.0,
+        "width": 25.0,
+        "height": 12.0
+      }
+    },
+    {
+      "name": "civil_status_married",
+      "state": "unchecked",
+      "confidence": 0.693,
+      "anchor_text": "Married",
+      "bbox": {
+        "top": 278.0,
+        "left": 163.0,
+        "bottom": 292.0,
+        "right": 211.0,
+        "width": 48.0,
+        "height": 14.0
+      }
+    },
+    {
+      "name": "widowed",
+      "state": "unchecked",
+      "confidence": 0.697,
+      "anchor_text": "widowed",
+      "bbox": {
+        "top": 292.0,
+        "left": 163.0,
+        "bottom": 306.0,
+        "right": 216.0,
+        "width": 53.0,
+        "height": 14.0
+      }
+    },
+    {
+      "name": "refugee?yes",
+      "state": "unclear",
+      "confidence": 0.471,
+      "anchor_text": "Refugee?Yes",
+      "bbox": {
+        "top": 248.0,
+        "left": 385.0,
+        "bottom": 265.0,
+        "right": 460.0,
+        "width": 75.0,
+        "height": 17.0
+      }
+    },
+    {
+      "name": "11._citizenship",
+      "state": "unchecked",
+      "confidence": 0.668,
+      "anchor_text": "11. citizenship",
+      "bbox": {
+        "top": 278.0,
+        "left": 385.0,
+        "bottom": 292.0,
+        "right": 439.0,
+        "width": 54.0,
+        "height": 14.0
+      }
+    },
+    {
+      "name": "filipino",
+      "state": "unchecked",
+      "confidence": 0.699,
+      "anchor_text": "Filipino",
+      "bbox": {
+        "top": 295.0,
+        "left": 386.0,
+        "bottom": 306.0,
+        "right": 419.0,
+        "width": 33.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "month",
+      "state": "unchecked",
+      "confidence": 0.691,
+      "anchor_text": "Month",
+      "bbox": {
+        "top": 255.0,
+        "left": 71.0,
+        "bottom": 262.0,
+        "right": 91.0,
+        "width": 20.0,
+        "height": 7.0
+      }
+    },
+    {
+      "name": "06",
+      "state": "unchecked",
+      "confidence": 0.698,
+      "anchor_text": "06",
+      "bbox": {
+        "top": 269.0,
+        "left": 57.0,
+        "bottom": 281.0,
+        "right": 71.0,
+        "width": 14.0,
+        "height": 12.0
+      }
+    },
+    {
+      "name": "13.",
+      "state": "unchecked",
+      "confidence": 0.697,
+      "anchor_text": "13.",
+      "bbox": {
+        "top": 402.0,
+        "left": 3.0,
+        "bottom": 411.0,
+        "right": 16.0,
+        "width": 13.0,
+        "height": 9.0
+      }
+    },
+    {
+      "name": "14.",
+      "state": "unchecked",
+      "confidence": 0.698,
+      "anchor_text": "14.",
+      "bbox": {
+        "top": 433.0,
+        "left": 1.0,
+        "bottom": 445.0,
+        "right": 17.0,
+        "width": 16.0,
+        "height": 12.0
+      }
+    },
+    {
+      "name": "15.",
+      "state": "unchecked",
+      "confidence": 0.696,
+      "anchor_text": "15.",
+      "bbox": {
+        "top": 465.0,
+        "left": 2.0,
+        "bottom": 478.0,
+        "right": 17.0,
+        "width": 15.0,
+        "height": 13.0
+      }
+    },
+    {
+      "name": "santos_trading",
+      "state": "unchecked",
+      "confidence": 0.689,
+      "anchor_text": "Santos Trading",
+      "bbox": {
+        "top": 477.0,
+        "left": 1.0,
+        "bottom": 494.0,
+        "right": 66.0,
+        "width": 65.0,
+        "height": 17.0
+      }
+    },
+    {
+      "name": "f._business_details",
+      "state": "unchecked",
+      "confidence": 0.692,
+      "anchor_text": "F. BUSINESS DETAILS",
+      "bbox": {
+        "top": 502.0,
+        "left": 3.0,
+        "bottom": 515.0,
+        "right": 97.0,
+        "width": 94.0,
+        "height": 13.0
+      }
+    },
+    {
+      "name": "123_rizal_building",
+      "state": "unchecked",
+      "confidence": 0.686,
+      "anchor_text": "123 Rizal Building",
+      "bbox": {
+        "top": 536.0,
+        "left": 3.0,
+        "bottom": 547.0,
+        "right": 77.0,
+        "width": 74.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "18._barangay",
+      "state": "unchecked",
+      "confidence": 0.643,
+      "anchor_text": "18. Barangay",
+      "bbox": {
+        "top": 550.0,
+        "left": 0.0,
+        "bottom": 567.0,
+        "right": 51.0,
+        "width": 51.0,
+        "height": 17.0
+      }
+    },
+    {
+      "name": "barangay_san_isidro",
+      "state": "unchecked",
+      "confidence": 0.699,
+      "anchor_text": "Barangay San Isidro",
+      "bbox": {
+        "top": 567.0,
+        "left": 2.0,
+        "bottom": 581.0,
+        "right": 84.0,
+        "width": 82.0,
+        "height": 14.0
+      }
+    },
+    {
+      "name": "21._region",
+      "state": "unchecked",
+      "confidence": 0.666,
+      "anchor_text": "21. Region",
+      "bbox": {
+        "top": 583.0,
+        "left": 1.0,
+        "bottom": 600.0,
+        "right": 43.0,
+        "width": 42.0,
+        "height": 17.0
+      }
+    },
+    {
+      "name": "ncr",
+      "state": "unchecked",
+      "confidence": 0.695,
+      "anchor_text": "NCR",
+      "bbox": {
+        "top": 598.0,
+        "left": 1.0,
+        "bottom": 613.0,
+        "right": 26.0,
+        "width": 25.0,
+        "height": 15.0
+      }
+    },
+    {
+      "name": "17._street",
+      "state": "unchecked",
+      "confidence": 0.66,
+      "anchor_text": "17. Street",
+      "bbox": {
+        "top": 519.0,
+        "left": 404.0,
+        "bottom": 533.0,
+        "right": 439.0,
+        "width": 35.0,
+        "height": 14.0
+      }
+    },
+    {
+      "name": "bonifacio_street",
+      "state": "unchecked",
+      "confidence": 0.699,
+      "anchor_text": "Bonifacio Street",
+      "bbox": {
+        "top": 536.0,
+        "left": 405.0,
+        "bottom": 547.0,
+        "right": 469.0,
+        "width": 64.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "20._province",
+      "state": "unchecked",
+      "confidence": 0.677,
+      "anchor_text": "20. Province",
+      "bbox": {
+        "top": 553.0,
+        "left": 405.0,
+        "bottom": 564.0,
+        "right": 447.0,
+        "width": 42.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "metro_manila",
+      "state": "unchecked",
+      "confidence": 0.699,
+      "anchor_text": "Metro Manila",
+      "bbox": {
+        "top": 568.0,
+        "left": 404.0,
+        "bottom": 579.0,
+        "right": 458.0,
+        "width": 54.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "23._mobile_no.",
+      "state": "unchecked",
+      "confidence": 0.697,
+      "anchor_text": "23. Mobile no.",
+      "bbox": {
+        "top": 585.0,
+        "left": 404.0,
+        "bottom": 596.0,
+        "right": 451.0,
+        "width": 47.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "0917-123-4567",
+      "state": "unchecked",
+      "confidence": 0.697,
+      "anchor_text": "0917-123-4567",
+      "bbox": {
+        "top": 598.0,
+        "left": 404.0,
+        "bottom": 612.0,
+        "right": 466.0,
+        "width": 62.0,
+        "height": 14.0
+      }
+    },
+    {
+      "name": "quezon_city",
+      "state": "unchecked",
+      "confidence": 0.698,
+      "anchor_text": "Quezon City",
+      "bbox": {
+        "top": 567.0,
+        "left": 244.0,
+        "bottom": 581.0,
+        "right": 296.0,
+        "width": 52.0,
+        "height": 14.0
+      }
+    },
+    {
+      "name": "(02)_8123-4567",
+      "state": "unchecked",
+      "confidence": 0.687,
+      "anchor_text": "(02) 8123-4567",
+      "bbox": {
+        "top": 600.0,
+        "left": 245.0,
+        "bottom": 611.0,
+        "right": 306.0,
+        "width": 61.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "activity_service",
+      "state": "unchecked",
+      "confidence": 0.646,
+      "anchor_text": "Service",
+      "bbox": {
+        "top": 650.0,
+        "left": 109.0,
+        "bottom": 667.0,
+        "right": 155.0,
+        "width": 46.0,
+        "height": 17.0
+      }
+    },
+    {
+      "name": "activity_importer",
+      "state": "unchecked",
+      "confidence": 0.699,
+      "anchor_text": "Importer",
+      "bbox": {
+        "top": 667.0,
+        "left": 111.0,
+        "bottom": 678.0,
+        "right": 158.0,
+        "width": 47.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "reteiler",
+      "state": "unchecked",
+      "confidence": 0.615,
+      "anchor_text": "Reteiler",
+      "bbox": {
+        "top": 650.0,
+        "left": 216.0,
+        "bottom": 668.0,
+        "right": 263.0,
+        "width": 47.0,
+        "height": 18.0
+      }
+    },
+    {
+      "name": "activity_exporter",
+      "state": "unchecked",
+      "confidence": 0.694,
+      "anchor_text": "Exporter",
+      "bbox": {
+        "top": 664.0,
+        "left": 215.0,
+        "bottom": 681.0,
+        "right": 265.0,
+        "width": 50.0,
+        "height": 17.0
+      }
+    },
+    {
+      "name": "wholesaler",
+      "state": "unchecked",
+      "confidence": 0.685,
+      "anchor_text": "wholesaler",
+      "bbox": {
+        "top": 667.0,
+        "left": 2.0,
+        "bottom": 678.0,
+        "right": 61.0,
+        "width": 59.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "h.owner_details",
+      "state": "unchecked",
+      "confidence": 0.67,
+      "anchor_text": "H.OWNER DETAILS",
+      "bbox": {
+        "top": 689.0,
+        "left": 4.0,
+        "bottom": 699.0,
+        "right": 90.0,
+        "width": 86.0,
+        "height": 10.0
+      }
+    },
+    {
+      "name": "27.street",
+      "state": "unchecked",
+      "confidence": 0.696,
+      "anchor_text": "27.Street",
+      "bbox": {
+        "top": 728.0,
+        "left": 243.0,
+        "bottom": 739.0,
+        "right": 279.0,
+        "width": 36.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "bonifacio_street",
+      "state": "unchecked",
+      "confidence": 0.698,
+      "anchor_text": "Bonifacio Street",
+      "bbox": {
+        "top": 743.0,
+        "left": 244.0,
+        "bottom": 754.0,
+        "right": 310.0,
+        "width": 66.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "30._province",
+      "state": "unchecked",
+      "confidence": 0.692,
+      "anchor_text": "30. Province",
+      "bbox": {
+        "top": 762.0,
+        "left": 244.0,
+        "bottom": 772.0,
+        "right": 287.0,
+        "width": 43.0,
+        "height": 10.0
+      }
+    },
+    {
+      "name": "metro_manila",
+      "state": "unchecked",
+      "confidence": 0.7,
+      "anchor_text": "Metro Manila",
+      "bbox": {
+        "top": 776.0,
+        "left": 244.0,
+        "bottom": 787.0,
+        "right": 299.0,
+        "width": 55.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "33._mobile_no.",
+      "state": "unchecked",
+      "confidence": 0.691,
+      "anchor_text": "33. Mobile no.",
+      "bbox": {
+        "top": 793.0,
+        "left": 244.0,
+        "bottom": 804.0,
+        "right": 292.0,
+        "width": 48.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "0917-123-4567",
+      "state": "unchecked",
+      "confidence": 0.695,
+      "anchor_text": "0917-123-4567",
+      "bbox": {
+        "top": 808.0,
+        "left": 244.0,
+        "bottom": 819.0,
+        "right": 306.0,
+        "width": 62.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "28._barangay",
+      "state": "unchecked",
+      "confidence": 0.697,
+      "anchor_text": "28. Barangay",
+      "bbox": {
+        "top": 729.0,
+        "left": 404.0,
+        "bottom": 740.0,
+        "right": 448.0,
+        "width": 44.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "barangay_san_isidro",
+      "state": "unchecked",
+      "confidence": 0.697,
+      "anchor_text": "Barangay San Isidro",
+      "bbox": {
+        "top": 742.0,
+        "left": 404.0,
+        "bottom": 756.0,
+        "right": 483.0,
+        "width": 79.0,
+        "height": 14.0
+      }
+    },
+    {
+      "name": "31._region",
+      "state": "unchecked",
+      "confidence": 0.696,
+      "anchor_text": "31. Region",
+      "bbox": {
+        "top": 760.0,
+        "left": 403.0,
+        "bottom": 774.0,
+        "right": 441.0,
+        "width": 38.0,
+        "height": 14.0
+      }
+    },
+    {
+      "name": "ncr",
+      "state": "unchecked",
+      "confidence": 0.699,
+      "anchor_text": "NCR",
+      "bbox": {
+        "top": 774.0,
+        "left": 402.0,
+        "bottom": 789.0,
+        "right": 425.0,
+        "width": 23.0,
+        "height": 15.0
+      }
+    },
+    {
+      "name": "34._email_address",
+      "state": "unchecked",
+      "confidence": 0.687,
+      "anchor_text": "34. Email Address",
+      "bbox": {
+        "top": 793.0,
+        "left": 405.0,
+        "bottom": 804.0,
+        "right": 464.0,
+        "width": 59.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "123_rizal_building",
+      "state": "unchecked",
+      "confidence": 0.686,
+      "anchor_text": "123 Rizal Building",
+      "bbox": {
+        "top": 743.0,
+        "left": 3.0,
+        "bottom": 754.0,
+        "right": 77.0,
+        "width": 74.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "quezon_city",
+      "state": "unchecked",
+      "confidence": 0.667,
+      "anchor_text": "Quezon City",
+      "bbox": {
+        "top": 777.0,
+        "left": 3.0,
+        "bottom": 788.0,
+        "right": 55.0,
+        "width": 52.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "(02)_8123-4567",
+      "state": "unchecked",
+      "confidence": 0.689,
+      "anchor_text": "(02) 8123-4567",
+      "bbox": {
+        "top": 808.0,
+        "left": 3.0,
+        "bottom": 819.0,
+        "right": 67.0,
+        "width": 64.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "i.partner_agencies",
+      "state": "unchecked",
+      "confidence": 0.668,
+      "anchor_text": "I.PARTNER AGENCIES",
+      "bbox": {
+        "top": 832.0,
+        "left": 3.0,
+        "bottom": 842.0,
+        "right": 101.0,
+        "width": 98.0,
+        "height": 10.0
+      }
+    },
+    {
+      "name": "j.other_details",
+      "state": "unchecked",
+      "confidence": 0.673,
+      "anchor_text": "J.OTHER DETAILS",
+      "bbox": {
+        "top": 872.0,
+        "left": 6.0,
+        "bottom": 882.0,
+        "right": 85.0,
+        "width": 79.0,
+        "height": 10.0
+      }
+    },
+    {
+      "name": "30._asset",
+      "state": "unchecked",
+      "confidence": 0.637,
+      "anchor_text": "30. Asset",
+      "bbox": {
+        "top": 889.0,
+        "left": 2.0,
+        "bottom": 900.0,
+        "right": 37.0,
+        "width": 35.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "150,000.00",
+      "state": "unchecked",
+      "confidence": 0.697,
+      "anchor_text": "150,000.00",
+      "bbox": {
+        "top": 903.0,
+        "left": 2.0,
+        "bottom": 914.0,
+        "right": 51.0,
+        "width": 49.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "philhealth",
+      "state": "unchecked",
+      "confidence": 0.676,
+      "anchor_text": "PhilHealth",
+      "bbox": {
+        "top": 850.0,
+        "left": 259.0,
+        "bottom": 861.0,
+        "right": 311.0,
+        "width": 52.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "37._capitalization",
+      "state": "unchecked",
+      "confidence": 0.699,
+      "anchor_text": "37. Capitalization",
+      "bbox": {
+        "top": 889.0,
+        "left": 244.0,
+        "bottom": 899.0,
+        "right": 303.0,
+        "width": 59.0,
+        "height": 10.0
+      }
+    },
+    {
+      "name": "100,000.00",
+      "state": "unchecked",
+      "confidence": 0.697,
+      "anchor_text": "100,000.00",
+      "bbox": {
+        "top": 903.0,
+        "left": 245.0,
+        "bottom": 914.0,
+        "right": 291.0,
+        "width": 46.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "gender_male",
+      "state": "unchecked",
+      "confidence": 0.689,
+      "anchor_text": "Male",
+      "bbox": {
+        "top": 923.0,
+        "left": 260.0,
+        "bottom": 931.0,
+        "right": 278.0,
+        "width": 18.0,
+        "height": 8.0
+      }
+    },
+    {
+      "name": "1",
+      "state": "unchecked",
+      "confidence": 0.699,
+      "anchor_text": "1",
+      "bbox": {
+        "top": 935.0,
+        "left": 258.0,
+        "bottom": 948.0,
+        "right": 269.0,
+        "width": 11.0,
+        "height": 13.0
+      }
+    },
+    {
+      "name": "50,000.00",
+      "state": "unchecked",
+      "confidence": 0.696,
+      "anchor_text": "50,000.00",
+      "bbox": {
+        "top": 903.0,
+        "left": 404.0,
+        "bottom": 914.0,
+        "right": 445.0,
+        "width": 41.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "female:",
+      "state": "unchecked",
+      "confidence": 0.697,
+      "anchor_text": "Female:",
+      "bbox": {
+        "top": 922.0,
+        "left": 386.0,
+        "bottom": 933.0,
+        "right": 416.0,
+        "width": 30.0,
+        "height": 11.0
+      }
+    },
+    {
+      "name": "2",
+      "state": "unchecked",
+      "confidence": 0.698,
+      "anchor_text": "2",
+      "bbox": {
+        "top": 936.0,
+        "left": 387.0,
+        "bottom": 948.0,
+        "right": 396.0,
+        "width": 9.0,
+        "height": 12.0
+      }
+    },
+    {
+      "name": "total:",
+      "state": "unchecked",
+      "confidence": 0.667,
+      "anchor_text": "TOTAL:",
+      "bbox": {
+        "top": 921.0,
+        "left": 514.0,
+        "bottom": 933.0,
+        "right": 540.0,
+        "width": 26.0,
+        "height": 12.0
+      }
+    },
+    {
+      "name": "3",
+      "state": "unchecked",
+      "confidence": 0.697,
+      "anchor_text": "3",
+      "bbox": {
+        "top": 935.0,
+        "left": 513.0,
+        "bottom": 949.0,
+        "right": 525.0,
+        "width": 12.0,
+        "height": 14.0
+      }
+    }
+  ]
+}

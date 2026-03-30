@@ -63,12 +63,12 @@ def get_ai_client() -> OpenAI:
         )
     
     elif provider == "groq":
-        # Groq: Deprecated but kept for backwards compatibility
-        # Note: Groq SDK has same chat.completions.create() API as OpenAI
-        api_key = settings.AI_API_KEY
+        # Groq: Primary provider for structured field extraction
+        # Try GROQ_API_KEY first, fall back to AI_API_KEY for backwards compatibility
+        api_key = settings.GROQ_API_KEY or settings.AI_API_KEY
         if not api_key:
             raise ValueError(
-                "AI_API_KEY must be set when using Groq provider (deprecated)"
+                "GROQ_API_KEY or AI_API_KEY must be set when using Groq provider"
             )
         try:
             from groq import Groq

@@ -362,3 +362,59 @@ class TestApplyDTIBNRCorrections:
         assert len(corrected) >= len(fields)
         # At least some improvements should happen
         assert any("composite" in k for k in corrected.keys()) or len(corrected) > 0
+
+    def test_checkbox_handling_activity_retailer_empty(self):
+        """Test checkbox field with empty OCR value converts to empty string."""
+        fields = {
+            "activity_retailer": {"value": "", "confidence": 0.6},
+        }
+        
+        corrected = apply_dti_bnr_corrections(fields)
+        
+        # Empty checkbox should stay empty (unchecked)
+        assert corrected["activity_retailer"]["value"] == ""
+        assert corrected["activity_retailer"]["confidence"] >= 0.42  # Lower bound: 0.6 * 0.7
+
+    def test_checkbox_handling_activity_service_checked(self):
+        """Test checkbox field with explicit 'true' converts to 'true'."""
+        fields = {
+            "activity_service": {"value": "true", "confidence": 0.85},
+        }
+        
+        corrected = apply_dti_bnr_corrections(fields)
+        
+        # Explicit "true" should stay as "true"
+        assert corrected["activity_service"]["value"] == "true"
+        assert corrected["activity_service"]["confidence"] <= 0.95  # Capped at 0.95
+
+    def test_checkbox_handling_activity_exporter_visual_mark(self):
+        """Test checkbox field with visual checkmark (✓) converts to 'true'."""
+        fields = {
+            "activity_exporter": {"value": "✓", "confidence": 0.75},
+        }
+        
+        corrected = apply_dti_bnr_corrections(fields)
+        
+        # Visual checkmark should convert to "true"
+        assert corrected["activity_exporter"]["value"] == "true"
+        # ✓ is recognized as explicit "true" → confidence boosted: min(0.95, 0.75 * 1.1) = 0.825
+        assert corrected["activity_exporter"]["confidence"] == min(0.95, 0.75 * 1.1)
+
+    def test_checkbox_handling_multiple_checkboxes(self):
+        """Test batch processing of multiple checkbox types with different values."""
+        fields = {
+            "activity_retailer": {"value": "", "confidence": 0.5},
+            "activity_service": {"value": "true", "confidence": 0.8},
+            "activity_manufacturer": {"value": "false", "confidence": 0.75},
+            "same_as_business": {"value": "yes", "confidence": 0.6},  # "yes" → "true"
+            "partner_philhealth": {"value": "X", "confidence": 0.65},  # "X" → "true"
+        }
+        
+        corrected = apply_dti_bnr_corrections(fields)
+        
+        # All checkboxes should be normalized correctly
+        assert corrected["activity_retailer"]["value"] == ""
+        assert corrected["activity_service"]["value"] == "true"
+        assert corrected["activity_manufacturer"]["value"] == "false"
+        assert corrected["same_as_business"]["value"] == "true"  # "yes" → "true"
+        assert corrected["partner_philhealth"]["value"] == "true"  # "X" → "true"

@@ -333,6 +333,95 @@ def apply_dti_bnr_corrections(fields: dict[str, dict[str, Any]]) -> dict[str, di
     """
     corrected = fields.copy()
     
+    # ─────────────────────────────────────────────
+    # 1. CHECKBOX FIELD HANDLING (Critical for Phase 3.2B)
+    # ─────────────────────────────────────────────
+    # Checkbox fields should return "true"/"false" strings.
+    # If empty or just label text, try to infer from context.
+    
+    CHECKBOX_FIELDS = {
+        # Activity types
+        "activity_manufacturer", "activity_service", "activity_retailer",
+        "activity_wholesaler", "activity_importer", "activity_exporter",
+        # Partner agencies (checkboxes)
+        "partner_philhealth", "partner_pagibig", "partner_sss",
+        # Other checkboxes
+        "same_as_business",
+        # Other checkboxes that may be in template
+        "is_refugee", "civil_status_single", "civil_status_married",
+        "civil_status_widowed", "civil_status_legally_separated",
+        "gender_male", "gender_female",
+        "reg_type_new", "reg_type_renewal",
+        "tin_status_with_tin", "tin_status_without_tin",
+    }
+    
+    checkbox_count = 0
+    for checkbox_field in ['activity_manufacturer', 'activity_service', 'activity_retailer',
+                          'activity_wholesaler', 'activity_importer', 'activity_exporter',
+                          'partner_philhealth', 'partner_pagibig', 'partner_sss',
+                          'same_as_business', 'is_refugee',
+                          'civil_status_single', 'civil_status_married', 'civil_status_widowed', 
+                          'civil_status_legally_separated', 'gender_male', 'gender_female',
+                          'reg_type_new', 'reg_type_renewal', 'tin_status_with_tin', 'tin_status_without_tin']:
+        if checkbox_field in corrected:
+            value = corrected[checkbox_field].get("value", "").strip()
+            conf = corrected[checkbox_field].get("confidence", 0.5)
+            source = corrected[checkbox_field].get("source", "")
+            
+            # CRITICAL: Skip DTI rules if this checkbox came from visual checkbox detection
+            # (Phase 3.2B checkbox_field_mapping.py already determined true/false)
+            if source == "checkbox_detection":
+                # Preserve checkbox detection result as-is
+                if value in ["true", "false"]:
+                    checkbox_count += 1
+                    continue
+            
+            # Priority 1: Already valid checkbox states ("true", "false") → keep them
+            if value.lower() in ['true', 'yes', '1', 'checked', '✓', 'x']:
+                # Saw explicit "true"/"yes" — checkbox is checked
+                corrected[checkbox_field] = {
+                    "value": "true",
+                    "confidence": min(0.95, conf * 1.1)  # Slightly boost for explicit state
+                }
+                checkbox_count += 1
+            elif value.lower() in ['false', 'no', '0', 'unchecked']:
+                # Saw explicit "false"/"no" — checkbox is NOT checked
+                corrected[checkbox_field] = {
+                    "value": "false",
+                    "confidence": min(0.95, conf * 1.1)
+                }
+                checkbox_count += 1
+            # Priority 2: Value is empty or just a label → default to unchecked
+            elif not value or (len(value) < 20 and value.lower() in [
+                'yes.', 'no.',
+                # Activity labels that might be returned by OCR
+                'service', 'retailer', 'wholesaler', 'manufacturer', 'importer', 'exporter',
+                'producer', 'single', 'married', 'widowed', 'legally separated',
+                'male', 'female', 'new', 'renewal', 'with tin', 'without tin',
+                # Partner agencies
+                'philhealth', 'pag-ibig', 'pagibig', 'pag ibig', 'sss',
+                # Other
+                'same as business', 'refugee'
+            ]):
+                # For these cases, default to empty (unchecked)
+                # Since we can't determine state from label alone, keep empty
+                corrected[checkbox_field] = {
+                    "value": "",  # Empty = unchecked by default
+                    "confidence": max(0.5, conf * 0.7)  # Lower confidence for uncertain checkbox
+                }
+                checkbox_count += 1
+            # Priority 3: Visual marks (✓, ×, etc.) → infer state from mark
+            else:
+                if any(mark in value for mark in ['✓', 'X', 'x', '||', '█', '■', '●']):
+                    corrected[checkbox_field] = {"value": "true", "confidence": 0.80}
+                    checkbox_count += 1
+                elif any(mark in value for mark in ['□', '○', '()', '[]']):
+                    corrected[checkbox_field] = {"value": "false", "confidence": 0.80}
+                    checkbox_count += 1
+    
+    if checkbox_count > 0:
+        logger.debug(f"[DTI-RULES] Processed {checkbox_count} checkbox fields")
+    
     # Certificate number
     if "certificate_no" in corrected and corrected["certificate_no"].get("value"):
         corrected["certificate_no"] = validate_certificate_no(

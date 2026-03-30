@@ -195,12 +195,12 @@ def _apply_dti_rules(fields: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 @celery_app.task(
-    name="app.services.glm_ocr_task.process_form_with_glm",
+    name="app.services.ocr_task.process_ocr_task",  # Same name as old task for backward compat
     bind=True,
     max_retries=2,
     default_retry_delay=10,
 )
-def process_form_with_glm(self, form_entry_id: str) -> dict:
+def process_ocr_task(self, form_entry_id: str) -> dict:
     """
     Main GLM-OCR processing pipeline (Celery task).
     
@@ -353,8 +353,6 @@ def process_form_with_glm(self, form_entry_id: str) -> dict:
         db.close()
 
 
-# For compatibility with existing code that imports from ocr_task
-# Just forward to the new task
-def process_ocr_task(form_entry_id: str) -> dict:
-    """Compatibility wrapper - calls new GLM-based task."""
-    return process_form_with_glm.delay(form_entry_id).get()
+# Integration note: When deployed, replace ocr_task.py with this file
+# Celery tasks are registered by task name, so the task name must match:
+# "app.services.ocr_task.process_ocr_task"

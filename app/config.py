@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     
     # Groq Configuration (primary provider - Llama 3.3 70B for structured extraction)
     GROQ_API_KEY: str = ""  # Groq API key
+    GROQ_API_KEY_1: str = ""  # Backup Groq API key
+    GROQ_API_KEY_2: str = ""  # Backup Groq API key
+    GROQ_API_KEY_3: str = ""  # Backup Groq API key
     GROQ_MODEL: str = "llama-3.3-70b-versatile"  # Best for structured field extraction (280 tokens/sec, $0.59/$0.79)
     GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
     GROQ_TEMPERATURE: float = 0.3  # Lower temperature for structured extraction
@@ -53,7 +56,7 @@ class Settings(BaseSettings):
     # NVIDIA API (fallback - free tier with 40 req/min limit)
     NVIDIA_API_KEY: str = ""  # NVIDIA API key (https://build.nvidia.com) — format: nvapi-xxxxxxxx
     NVIDIA_BASE_URL: str = "https://integrate.api.nvidia.com/v1"  # NVIDIA endpoint
-    AI_VISION_MODEL: str = "meta/llama-3.2-90b-vision-instruct"  # NVIDIA free model (90B vision)
+    AI_VISION_MODEL: str = "llama-3.3-70b-versatile"  # Groq model for structured field extraction (text-to-fields reasoning)
     NVIDIA_RATE_LIMIT: int = 40  # Requests per minute (free tier limit)
     
     # OpenRouter configuration (fallback)
@@ -75,10 +78,18 @@ class Settings(BaseSettings):
         keys = [self.AI_API_KEY, self.AI_API_KEY_1, self.AI_API_KEY_2, self.AI_API_KEY_3]
         return [k for k in keys if k]
 
+    @property
+    def groq_api_keys(self) -> list[str]:
+        """Return all configured Groq API keys (non-empty)."""
+        keys = [self.GROQ_API_KEY, self.GROQ_API_KEY_1, self.GROQ_API_KEY_2, self.GROQ_API_KEY_3]
+        return [k for k in keys if k]
+
     # CORS
     CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:3001"]
 
     # Performance / RAM Management
+    # Set LOW_RAM_MODE=true to minimize memory usage (slower OCR, smaller model)
+    LOW_RAM_MODE: bool = False
     # Set CACHE_OCR_MODEL=true to keep PaddleOCR in memory (70% faster, uses 500MB)
     # Set CACHE_OCR_MODEL=false to reload per task (slower, uses less peak RAM)
     CACHE_OCR_MODEL: bool = True
