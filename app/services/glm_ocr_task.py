@@ -25,7 +25,8 @@ if not hasattr(tomllib, 'load'):
     import importlib
     import toml as tomllib
 
-from app.models.form_entry import FormEntry, FormEntryStatus, FormField
+from app.models.form_entry import FormEntry, FormEntryStatus
+from app.models.form_field import FormField
 from app.models.form_template import FormTemplate
 from app.services.glm_field_extractor import GLMFieldExtractor
 from app.services.glm_ocr_service import GLMOCRService
