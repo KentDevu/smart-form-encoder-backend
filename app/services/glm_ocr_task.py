@@ -11,27 +11,28 @@ Architecture:
 5. Save to database
 """
 
-import asyncio
 import json
 import logging
 import os
 from typing import Any, Optional, Tuple
 
-import torch
-from sqlalchemy import select, selectinload
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, sessionmaker, selectinload
+from sqlalchemy import create_engine
 
-from app.database import Base, get_db, sync_session_factory
+import tomllib
+if not hasattr(tomllib, 'load'):
+    import importlib
+    import toml as tomllib
+
 from app.models.form_entry import FormEntry, FormEntryStatus, FormField
 from app.models.form_template import FormTemplate
-from app.schemas.form import CreateFormFieldSchema
 from app.services.glm_field_extractor import GLMFieldExtractor
 from app.services.glm_ocr_service import GLMOCRService
-from app.services.storage import download_file_from_r2
 from celery import Celery
 from celery.utils.log import get_task_logger
 
-# Initialize Celery
+# Inititialize Celery
 celery_app = Celery(
     "smart_form_encoder",
     broker=os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0"),
@@ -39,9 +40,45 @@ celery_app = Celery(
 
 logger = get_task_logger(__name__)
 
+# Database setup
+def _get_engine():
+    """Get database engine from environment."""
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+        raise ValueError("DATABASE_URL environment variable not set")
+    return create_engine(db_url, pool_pre_ping=True)
+
+def _get_sync_session() -> Session:
+    """Get synchronous database session."""
+    engine = _get_engine()
+    SessionLocal = sessionmaker(bind=engine)
+    return SessionLocal()
+
+# R2 client setup
+def _get_r2_client():
+    """Get Cloudflare R2 client."""
+    import boto3
+    return boto3.client(
+        "s3",
+        endpoint_url=os.getenv("R2_ENDPOINT_URL"),
+        aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
+    )
+
+def _download_image_from_r2(object_key: str) -> bytes:
+    """Download image from Cloudflare R2 storage."""
+    logger.debug(f"Downloading image from R2: {object_key}")
+    
+    client = _get_r2_client()
+    bucket = os.getenv("R2_BUCKET_NAME", "smartform-uploads")
+    
+    response = client.get_object(Bucket=bucket, Key=object_key)
+    image_bytes = response["Body"].read()
+    logger.debug(f"Downloaded {len(image_bytes)} bytes from R2")
+    return image_bytes
+
 # Global GLM service instance
 _glm_service: Optional[GLMOCRService] = None
-
 
 def _get_glm_service() -> GLMOCRService:
     """Get or initialize singleton GLM service."""
@@ -60,21 +97,6 @@ def _get_glm_service() -> GLMOCRService:
             raise
     return _glm_service
 
-
-def _get_sync_session() -> Session:
-    """Get synchronous database session."""
-    return sync_session_factory()
-
-
-def _get_engine():
-    """Get database engine."""
-    from sqlalchemy import create_engine
-    db_url = os.getenv("DATABASE_URL")
-    if not db_url:
-        raise ValueError("DATABASE_URL environment variable not set")
-    return create_engine(db_url)
-
-
 def _sync_publish_progress(
     form_id: str,
     status: str,
@@ -83,12 +105,6 @@ def _sync_publish_progress(
 ) -> None:
     """
     Publish processing progress to Redis for frontend updates.
-    
-    Args:
-        form_id: Form entry ID
-        status: Current processing status
-        message: Optional status message
-        confidence: Optional average confidence score
     """
     try:
         import redis
@@ -105,15 +121,6 @@ def _sync_publish_progress(
     except Exception as e:
         logger.warning(f"Failed to publish progress: {e}")
 
-
-def _download_image_from_r2(object_key: str) -> bytes:
-    """Download image from Cloudflare R2 storage."""
-    logger.debug(f"Downloading image from R2: {object_key}")
-    image_bytes = download_file_from_r2(object_key)
-    logger.debug(f"Downloaded {len(image_bytes)} bytes from R2")
-    return image_bytes
-
-
 def _extract_fields_with_glm(
     image_bytes: bytes,
     template: FormTemplate,
@@ -121,17 +128,8 @@ def _extract_fields_with_glm(
 ) -> Tuple[list[dict[str, Any]], bool]:
     """
     Extract fields from image using GLM-OCR model.
-    
-    Args:
-        image_bytes: Raw image bytes
-        template: Form template with field schema
-        form_entry_id: For logging and debugging
-        
-    Returns:
-        (list of field dicts, success flag)
     """
     try:
-        # Save temporary image file for GLM processing
         import tempfile
         import hashlib
         from pathlib import Path
@@ -139,7 +137,7 @@ def _extract_fields_with_glm(
         temp_dir = Path(tempfile.gettempdir()) / "glm_ocr"
         temp_dir.mkdir(parents=True, exist_ok=True)
         
-        # Create unique filename based on form ID + content hash
+        # Create unique filename
         hash_suffix = hashlib.md5(image_bytes[:1000]).hexdigest()[:8]
         image_path = temp_dir / f"{form_entry_id}_{hash_suffix}.png"
         
@@ -163,7 +161,7 @@ def _extract_fields_with_glm(
         glm_fields = glm_service.extract_fields_from_image(
             str(image_path),
             field_schema_dict,
-            form_type="dti_bnr",  # TODO: Dynamic based on template
+            form_type="dti_bnr",
         )
         
         logger.info(f"[GLM] ✓ Extracted {len(glm_fields)} fields")
@@ -180,19 +178,10 @@ def _extract_fields_with_glm(
         logger.error(f"[GLM] Extraction failed: {e}", exc_info=True)
         return [], False
 
-
 def _apply_dti_rules(fields: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """
-    Apply DTI-specific business rules to extracted fields.
-    
-    This is where domain-specific corrections happen (normalize dates,
-    validate checkboxes, etc.).
-    """
-    # TODO: Import and run existing DTI rules engine
-    # For now, pass through unchanged
+    """Apply DTI-specific business rules to extracted fields."""
     logger.debug(f"[DTI-RULES] Processing {len(fields)} fields")
     return fields
-
 
 @celery_app.task(
     name="app.services.ocr_task.process_ocr_task",  # Same name as old task for backward compat
@@ -205,12 +194,6 @@ def process_ocr_task(self, form_entry_id: str) -> dict:
     Main GLM-OCR processing pipeline (Celery task).
     
     Simplified replacement for the previous 5-stage Paddle+Groq pipeline.
-    
-    Args:
-        form_entry_id: UUID of form entry to process
-        
-    Returns:
-        Result dict with status and field count
     """
     db = _get_sync_session()
     
@@ -351,8 +334,3 @@ def process_ocr_task(self, form_entry_id: str) -> dict:
     
     finally:
         db.close()
-
-
-# Integration note: When deployed, replace ocr_task.py with this file
-# Celery tasks are registered by task name, so the task name must match:
-# "app.services.ocr_task.process_ocr_task"
