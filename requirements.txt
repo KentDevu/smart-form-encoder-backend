@@ -35,6 +35,7 @@ starlette==0.41.3
 # Utilities
 python-dotenv==1.0.1
 httpx==0.28.1
+json_repair==0.25.1
 
 # AI Vision (OpenRouter via OpenAI-compatible API)
 # Note: Using OpenAI client for OpenRouter provider (same API format)
@@ -46,10 +47,12 @@ PyMuPDF==1.27.1
 # Computer Vision & Image Processing
 opencv-python==4.11.0.86
 
+# Deep Learning - GLM-OCR Model
+torch>=2.0.0
+transformers>=5.0.0
+
 # Dev & Testing
 pytest==8.3.4
 pytest-asyncio==0.25.0
 numpy
 Pillow
-paddleocr
-paddlepaddle
