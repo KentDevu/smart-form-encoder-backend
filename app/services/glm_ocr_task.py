@@ -20,11 +20,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker, selectinload
 from sqlalchemy import create_engine
 
-import tomllib
-if not hasattr(tomllib, 'load'):
-    import importlib
-    import toml as tomllib
-
+from app.config import get_settings
 from app.models.form_entry import FormEntry, FormEntryStatus
 from app.models.form_field import FormField
 from app.models.form_template import FormTemplate
@@ -33,7 +29,7 @@ from app.services.glm_ocr_service import GLMOCRService
 from celery import Celery
 from celery.utils.log import get_task_logger
 
-# Inititialize Celery
+# Initialize Celery
 celery_app = Celery(
     "smart_form_encoder",
     broker=os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0"),
@@ -41,17 +37,29 @@ celery_app = Celery(
 
 logger = get_task_logger(__name__)
 
-# Database setup
-def _get_engine():
-    """Get database engine from environment."""
-    db_url = os.getenv("DATABASE_URL")
-    if not db_url:
-        raise ValueError("DATABASE_URL environment variable not set")
-    return create_engine(db_url, pool_pre_ping=True)
+# Get settings (DATABASE_URL is in settings)
+settings = get_settings()
+
+# Database setup - cache engine at module level
+_sync_engine = None
+
+def _get_sync_engine():
+    """Get or create synchronous database engine."""
+    global _sync_engine
+    if _sync_engine is None:
+        # Convert async DATABASE_URL to sync if needed
+        db_url = settings.DATABASE_URL
+        # If using asyncpg URL, convert to regular psycopg2
+        if db_url.startswith("postgresql+asyncpg://"):
+            db_url = db_url.replace("postgresql+asyncpg://", "postgresql://")
+        
+        _sync_engine = create_engine(db_url, pool_pre_ping=True)
+        logger.debug(f"Created sync database engine from {db_url[:30]}...")
+    return _sync_engine
 
 def _get_sync_session() -> Session:
-    """Get synchronous database session."""
-    engine = _get_engine()
+    """Get synchronous database session using app settings."""
+    engine = _get_sync_engine()
     SessionLocal = sessionmaker(bind=engine)
     return SessionLocal()
 
